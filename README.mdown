@@ -1,0 +1,32 @@
+# Django Example Project #
+
+This repository is to help demonstrate an example Django project.
+We use modern tools available to developers to make our life simpler.
+
+Project requirements are simple:
+  - Vagrant (Virtualbox)
+  - Python
+  - Fabric
+
+Getting most of these is simple. Get Vagrant / VirtualBox by first going
+to the Virtualbox download page and installing the latest version.
+Vagrant is as simple as
+
+    $ sudo gem install vagrant
+
+Python is probably already installed, so there is nothing to do. Fabric
+is similarly simple.
+
+    $ sudo easy_install pip ; pip install fabric
+
+PIP is the replacement of easy_install, but it is still simpler to use
+easy_install to get pip. If easy_install is not available, you may need
+to use a package manager to get it (apt-get install python-setuptools).
+
+Those are the only tools that are needed on our host operating system,
+as the remaining tools are provisioned within a virtual machine. By
+using VM based development, we can have a consistent development and
+production environment, and avoid installing cruft on our development
+system.
+
+
