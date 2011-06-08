@@ -22,6 +22,12 @@ INSTALL_PACKAGES = [
             "python-setuptools",
             "git-core",
             "build-essential",
+            "libxml2-dev",
+            "libpcre3-dev",
+            "libpcrecpp0",
+            "libssl-dev",
+            "zlib1g-dev",
+            "libgeoip-dev",
             "memcached",
             "libmemcached-dev"
            ]
