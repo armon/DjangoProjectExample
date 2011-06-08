@@ -102,14 +102,18 @@ def dev_server():
   # Make manage executable
   run("chmod +x %(base)s/%(virtualenv)s/project/project/manage.py" % env)
 
-  # Holy fuck of a hack. We are starting a screen session to for runserver, but using vagrant
-  # ssh instead of run because it won't fucking work in fabric
+  # Run the Django runserver
   run("source %(base)s/%(virtualenv)s/bin/activate; %(base)s/%(virtualenv)s/project/project/manage.py runserver 0.0.0.0:8000" % env)
 
 
 def sub_vagrant_link_project():
   "Links the project into the virtual env"
   run("if [ ! -d %(base)s/%(virtualenv)s/project ]; then ln -f -s /project %(base)s/%(virtualenv)s/project; fi" % env)
+
+
+def default_project():
+  "For the purposes of our example project, we will initialize a blank django project"
+  run("source %(base)s/%(virtualenv)s/bin/activate; cd %(base)s/%(virtualenv)s/project/; django-admin.py startproject project" % env)
 
 
 ### End Vagrant
