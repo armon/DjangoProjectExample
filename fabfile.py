@@ -234,6 +234,7 @@ def sub_make_virtualenv():
   "Makes the virtualenv"
   sudo("if [ ! -d %(base)s ]; then mkdir -p %(base)s; chmod 777 %(base)s; fi" % env)
   run("if [ ! -d %(base)s/%(virtualenv)s ]; then python ~/virtualenv/virtualenv.py --no-site-packages %(base)s/%(virtualenv)s; fi" % env)
+  run("chmod 777 %(base)s/%(virtualenv)s" % env)
 
 
 def sub_setup_ssh():
