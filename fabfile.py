@@ -285,7 +285,7 @@ def syncdb():
   require('hosts', provided_by=[vagrant, staging, production])
   run("cd %(base)s/%(virtualenv)s; source bin/activate; cd project/project; python manage.py syncdb --noinput; python manage.py migrate --noinput;" % env) 
   if env.dev_mode:
-    run("chmod go+w /server/env.example.com/tmp/django.sqlite") # Enable group write
+    sudo("chmod 777 /server/env.example.com/tmp/django.sqlite") # Enable group write
 
 
 def pull():
