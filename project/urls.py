@@ -5,6 +5,6 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Uncomment the next line to enable the admin:
+    url(r'^$', 'apps.main.views.index'),
     url(r'^admin/', include(admin.site.urls)),
 )
