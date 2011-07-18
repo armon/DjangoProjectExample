@@ -1,4 +1,5 @@
 Django>=1.3
 South
-pylibmc
+python-memcached
+MySQL-python
 
