@@ -9,16 +9,19 @@ from fabric.api import run, sudo, put, env, require, local, settings
 GIT_ORIGIN = "git@github.com" 
 
 # The git repo is the repo we should clone
-GIT_REPO = "DjangoProjectExample.git"
+GIT_REPO = "armon/DjangoProjectExample.git"
 
 # The hosts we need to configure
-HOSTS = []
+HOSTS = ["ec2-107-20-11-199.compute-1.amazonaws.com"]
 
 # These are the packages we need to install using APT
 INSTALL_PACKAGES = [
             "ntp",
             "python2.6",
             "python2.6-dev",
+            "libxml2-dev",
+            "libxslt1-dev",
+            "python-libxml2",
             "python-setuptools",
             "git-core",
             "build-essential",
@@ -29,7 +32,9 @@ INSTALL_PACKAGES = [
             "zlib1g-dev",
             "libgeoip-dev",
             "memcached",
-            "libmemcached-dev"
+            "libmemcached-dev",
+            "python-mysqldb",
+            "libmysqlclient16-dev"
            ]
 
 #### Environments
@@ -44,6 +49,7 @@ def production():
   env.git_origin = GIT_ORIGIN
   env.git_repo = GIT_REPO
   env.dev_mode = False
+  env.key_filename = "config/aws/testdjango.pem"
 
 
 def staging():
@@ -56,6 +62,7 @@ def staging():
   env.git_origin = GIT_ORIGIN
   env.git_repo = GIT_REPO
   env.dev_mode = False
+  env.key_filename = "config/aws/testdjango.pem"
 
 
 def vagrant():
@@ -166,10 +173,10 @@ def sub_build_packages():
 def sub_build_uwsgi():
   "Builds uWSGI"
   sudo("mkdir -p /usr/src/uwsgi")
-  sudo("""cd /usr/src/uwsgi; if [ ! -e uwsgi-0.9.8.tar.gz ]; then \
-       wget 'http://projects.unbit.it/downloads/uwsgi-0.9.8.tar.gz'; \
-       tar xfz uwsgi-0.9.8.tar.gz; \
-       cd uwsgi-0.9.8; \
+  sudo("""cd /usr/src/uwsgi; if [ ! -e uwsgi-0.9.8.1.tar.gz ]; then \
+       wget 'http://projects.unbit.it/downloads/uwsgi-0.9.8.1.tar.gz'; \
+       tar xfz uwsgi-0.9.8.1.tar.gz; \
+       cd uwsgi-0.9.8.1; \
        make; \
        cp uwsgi /usr/local/sbin;
        fi""")
@@ -234,15 +241,16 @@ def sub_make_virtualenv():
   "Makes the virtualenv"
   sudo("if [ ! -d %(base)s ]; then mkdir -p %(base)s; chmod 777 %(base)s; fi" % env)
   run("if [ ! -d %(base)s/%(virtualenv)s ]; then python ~/virtualenv/virtualenv.py --no-site-packages %(base)s/%(virtualenv)s; fi" % env)
-  run("chmod 777 %(base)s/%(virtualenv)s" % env)
+  sudo("chmod 777 %(base)s/%(virtualenv)s" % env)
 
 
 def sub_setup_ssh():
   "Setup the ssh hosts file and keys"
-  put("config/ssh_hosts", "~/.ssh/config")
-  put("config/id_rsa", "~/.ssh/id_rsa", mode=0600)
-  put("config/id_rsa.pub", "~/.ssh/id_rsa.pub", mode=0600)
-  put("config/known_hosts", "~/.ssh/known_hosts", mode=0600)
+  run("mkdir -p ~/.ssh/")
+  put("config/id_rsa", "/home/%(user)s/.ssh/id_rsa" % env, mode=0600)
+  put("config/id_rsa.pub", "/home/%(user)s/.ssh/id_rsa.pub" % env, mode=0600)
+  put("config/known_hosts", "/home/%(user)s/.ssh/known_hosts" % env, mode=0600)
+
 
 
 def sub_git_clone():
@@ -266,7 +274,7 @@ def sub_start_processes():
   "Starts NginX and uWSGI"
   sudo("start nginx")
   sudo("start uwsgi")
-  sudo("/etc/init.d/memcached start")
+  sudo("nohup /etc/init.d/memcached restart")
 
 def sub_stop_processes():
   "Stops Nginx and uWSGI"
@@ -283,6 +291,7 @@ def sub_stop_processes():
 def syncdb():
   "Does a synbdb and a migrate"
   require('hosts', provided_by=[vagrant, staging, production])
+  sudo("chmod -R 777 %(base)s/%(virtualenv)s/tmp" % env)
   run("cd %(base)s/%(virtualenv)s; source bin/activate; cd project/project; python manage.py syncdb --noinput; python manage.py migrate --noinput;" % env) 
   if env.dev_mode:
     sudo("chmod 777 /server/env.example.com/tmp/django.sqlite") # Enable group write
