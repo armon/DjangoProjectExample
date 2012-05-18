@@ -6,7 +6,7 @@ from fabric.api import run, sudo, put, env, require, local, settings
 
 # The git origin is where we the repo is.
 # Use the user@host syntax
-GIT_ORIGIN = "git@github.com" 
+GIT_ORIGIN = "git@github.com"
 
 # The git repo is the repo we should clone
 GIT_REPO = "armon/DjangoProjectExample.git"
@@ -54,7 +54,7 @@ def production():
 
 def staging():
   "Setup staging settings"
-  env.hosts = HOSTS 
+  env.hosts = HOSTS
   env.repo = ("env.stage.example.com", "origin", "stage")
   env.base = "/server"
   env.virtualenv, env.parent, env.branch = env.repo
@@ -80,7 +80,7 @@ def vagrant():
   env.dev_mode = True
 
 
-#### Vagrant 
+#### Vagrant
 
 def setup_vagrant():
   "Bootstraps the Vagrant environment"
@@ -173,10 +173,10 @@ def sub_build_packages():
 def sub_build_uwsgi():
   "Builds uWSGI"
   sudo("mkdir -p /usr/src/uwsgi")
-  sudo("""cd /usr/src/uwsgi; if [ ! -e uwsgi-0.9.8.1.tar.gz ]; then \
-       wget 'http://projects.unbit.it/downloads/uwsgi-0.9.8.1.tar.gz'; \
-       tar xfz uwsgi-0.9.8.1.tar.gz; \
-       cd uwsgi-0.9.8.1; \
+  sudo("""cd /usr/src/uwsgi; if [ ! -e uwsgi-1.2.3.tar.gz ]; then \
+       wget 'http://projects.unbit.it/downloads/uwsgi-1.2.3.tar.gz'; \
+       tar xfz uwsgi-1.2.3.tar.gz; \
+       cd uwsgi-1.2.3; \
        make; \
        cp uwsgi /usr/local/sbin;
        fi""")
@@ -185,10 +185,10 @@ def sub_build_uwsgi():
 def sub_build_nginx():
   "Builds NginX"
   sudo("mkdir -p /usr/src/nginx")
-  sudo("""cd /usr/src/nginx; if [ ! -e nginx-1.0.4.tar.gz ]; then
-       wget 'http://nginx.org/download/nginx-1.0.4.tar.gz' ; \
-       tar xfz nginx-1.0.4.tar.gz; \
-       cd nginx-1.0.4/; \
+  sudo("""cd /usr/src/nginx; if [ ! -e nginx-1.2.0.tar.gz ]; then
+       wget 'http://nginx.org/download/nginx-1.2.0.tar.gz' ; \
+       tar xfz nginx-1.2.0.tar.gz; \
+       cd nginx-1.2.0/; \
        ./configure --pid-path=/var/run/nginx.pid \
        --conf-path=/etc/nginx/nginx.conf \
        --sbin-path=/usr/local/sbin \
@@ -231,10 +231,10 @@ def copy_nginx_config():
 
 def sub_get_virtualenv():
   "Fetches the virtualenv package"
-  run("if [ ! -e virtualenv-1.6.1.tar.gz ]; then wget http://pypi.python.org/packages/source/v/virtualenv/virtualenv-1.6.1.tar.gz; fi")
-  run("if [ ! -d virtualenv-1.6.1 ]; then tar xzf virtualenv-1.6.1.tar.gz; fi")
+  run("if [ ! -e virtualenv-1.7.1.2.tar.gz ]; then wget http://pypi.python.org/packages/source/v/virtualenv/virtualenv-1.7.1.2.tar.gz; fi")
+  run("if [ ! -d virtualenv-1.7.1.2 ]; then tar xzf virtualenv-1.7.1.2.tar.gz; fi")
   run("rm -f virtualenv")
-  run("ln -s virtualenv-1.6.1 virtualenv")
+  run("ln -s virtualenv-1.7.1.2 virtualenv")
 
 
 def sub_make_virtualenv():
@@ -255,11 +255,11 @@ def sub_setup_ssh():
 
 def sub_git_clone():
   "Clones a repository into the virtualenv at /project"
-  run("cd %(base)s/%(virtualenv)s; git clone %(git_origin)s:%(git_repo)s project; cd project; git checkout %(branch)s; git pull %(parent)s %(branch)s" % env) 
+  run("cd %(base)s/%(virtualenv)s; git clone %(git_origin)s:%(git_repo)s project; cd project; git checkout %(branch)s; git pull %(parent)s %(branch)s" % env)
 
 def sub_get_requirements():
   "Gets the requirements for the project"
-  sudo("cd %(base)s/%(virtualenv)s; source bin/activate; pip install -r project/requirements.txt" % env) 
+  sudo("cd %(base)s/%(virtualenv)s; source bin/activate; pip install -r project/requirements.txt" % env)
 
 
 def sub_get_admin_media():
@@ -284,7 +284,7 @@ def sub_stop_processes():
     sudo("/etc/init.d/memcached stop")
 
 
-#### 
+####
 
 #### Deploying new version
 
@@ -292,7 +292,7 @@ def syncdb():
   "Does a synbdb and a migrate"
   require('hosts', provided_by=[vagrant, staging, production])
   sudo("chmod -R 777 %(base)s/%(virtualenv)s/tmp" % env)
-  run("cd %(base)s/%(virtualenv)s; source bin/activate; cd project/project; python manage.py syncdb --noinput; python manage.py migrate --noinput;" % env) 
+  run("cd %(base)s/%(virtualenv)s; source bin/activate; cd project/project; python manage.py syncdb --noinput; python manage.py migrate --noinput;" % env)
   if env.dev_mode:
     sudo("chmod 777 /server/env.example.com/tmp/django.sqlite") # Enable group write
 
